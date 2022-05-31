@@ -26,8 +26,37 @@ class CustomDatasetFromFetch(Dataset):
         port = 22
         username = "gautam10"
         password = "randompassword1"
-        files = ['mnist_in_csv.csv', 'mnist_labels.csv']
-        directories = ['mnist_images', 'mnist_with_class']
+        directories = ['mnist_with_class']
+        remote_images_path = '/homes/gautam10/data/'
+        local_path = '../fetched/'
+
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(
+            paramiko.AutoAddPolicy())
+        ssh.connect(hostname=host, port=port, username=username, password=password)
+        sftp = ssh.open_sftp()
+        self.file_remote_paths = []
+        file_count = 0
+
+        for directory in directories:
+            command = "ls " + remote_images_path + directory
+            stdin, stdout, stderr = ssh.exec_command(command)
+            lines = stdout.readlines()
+            for line in lines:
+                self.file_remote_paths.append(line)
+                file_count += 1
+
+        sftp.close()
+        ssh.close()
+
+        self.data_len = file_count
+
+    def __getitem__(self, index):
+        host = "mc21.cs.purdue.edu"
+        port = 22
+        username = "gautam10"
+        password = "randompassword1"
+        directories = ['mnist_with_class']
         remote_images_path = '/homes/gautam10/data/'
         local_path = '../fetched/'
 
@@ -37,47 +66,38 @@ class CustomDatasetFromFetch(Dataset):
         ssh.connect(hostname=host, port=port, username=username, password=password)
         sftp = ssh.open_sftp()
 
-        for file in files:
-            file_remote = remote_images_path + file
-            file_local = local_path + file
-            sftp.get(file_remote, file_local)
-            print(file_remote + '>>>' + file_local)
-        for directory in directories:
-            command = "ls " + remote_images_path + directory
-            stdin, stdout, stderr = ssh.exec_command(command)
-            lines = stdout.readlines()
-            for line in lines:
-                file_remote = remote_images_path + directory + "/" + line[:len(line) - 1]
-                file_local = local_path + directory + "/" +line[:len(line) - 1]
-                sftp.get(file_remote, file_local)
-                print(file_remote + '>>>' + file_local)
+        file_to_fetch = self.file_remote_paths[index]
 
+        file_remote = remote_images_path + 'mnist_with_class' + "/" + file_to_fetch[:len(file_to_fetch) - 1]
+
+        file_local = local_path + 'mnist_with_class' + "/" + file_to_fetch[:len(file_to_fetch) - 1]
+
+        sftp.get(file_remote, file_local)
+        print(file_remote + '>>>' + file_local)
         sftp.close()
         ssh.close()
 
-        self.data_len = 5
-
-    def __getitem__(self, index):
         # Get image name from the pandas df
-        single_image_name = self.image_arr[index]
+        single_image_path = file_local
         # Open image
-        img_as_img = Image.open(single_image_name)
+        im_as_im = Image.open(single_image_path)
 
-        # Check if there is an operation
-        some_operation = self.operation_arr[index]
-        # If there is an operation
-        if some_operation:
-            # Do some operation on image
-            # ...
-            # ...
-            pass
-        # Transform image to tensor
-        img_as_tensor = self.to_tensor(img_as_img)
+        # Do some operations on image
+        # Convert to numpy, dim = 28x28
+        im_as_np = np.asarray(im_as_im) / 255
+        # Add channel dimension, dim = 1x28x28
+        # Note: You do not need to do this if you are reading RGB images
+        # or i there is already channel dimension
+        im_as_np = np.expand_dims(im_as_np, 0)
 
-        # Get label(class) of the image based on the cropped pandas column
-        single_image_label = self.label_arr[index]
+        # Transform image to tensor, change data type
+        im_as_ten = torch.from_numpy(im_as_np).float()
 
-        return (img_as_tensor, single_image_label)
+        # Get label(class) of the image based on the file name
+        class_indicator_location = single_image_path.rfind('_c')
+        label = int(single_image_path[class_indicator_location + 2:class_indicator_location + 3])
+        return (im_as_ten, label)
+
 
     def __len__(self):
         return self.data_len

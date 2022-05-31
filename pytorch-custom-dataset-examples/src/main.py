@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     custom_sampler = OddEvenSampler(custom_mnist_from_csv_server)
 
-    mn_dataset_loader = torch.utils.data.DataLoader(dataset=custom_mnist_from_file,
+    mn_dataset_loader = torch.utils.data.DataLoader(dataset=custom_mnist_from_csv_server,
                                                     batch_size=10,
                                                     sampler=custom_sampler)
 
