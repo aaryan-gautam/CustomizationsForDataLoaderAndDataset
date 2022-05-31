@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     mn_dataset_loader = torch.utils.data.DataLoader(dataset=custom_mnist_from_csv_server,
                                                     batch_size=10,
-                                                    sampler=custom_sampler)
+                                                    sampler=custom_sampler, prefetch_factor=10, num_workers=1)
 
     model = MnistCNNModel()
     criterion = nn.CrossEntropyLoss()
