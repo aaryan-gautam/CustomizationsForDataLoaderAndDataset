@@ -25,7 +25,7 @@ class CustomDatasetFromFetch(Dataset):
         host = "mc21.cs.purdue.edu"
         port = 22
         username = "gautam10"
-        password = "randompassword1"
+        password = "randompassword3"
         directories = ['mnist_with_class']
         remote_images_path = '/homes/gautam10/data/'
         local_path = '../fetched/'
