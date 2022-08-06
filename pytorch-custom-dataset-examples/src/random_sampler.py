@@ -9,6 +9,8 @@ class RandomSampler(Sampler):
     @classmethod
     def update_tracker(cls, val):
         cls.shuffler_order_tracker += val
+        # print(cls.shuffler_order_tracker)
+        return cls.shuffler_order_tracker
 
     @classmethod
     def get_tracker(cls):
@@ -22,8 +24,12 @@ class RandomSampler(Sampler):
         self.pattern = list(range(self.size))
         random.shuffle(self.pattern)
         self.update_tracker(self.pattern)
+        # print(self.pattern)
         return iter(self.pattern)
 
     def __len__(self):
         return 50000
+
+    def get_pattern(self):
+        return self.pattern
 

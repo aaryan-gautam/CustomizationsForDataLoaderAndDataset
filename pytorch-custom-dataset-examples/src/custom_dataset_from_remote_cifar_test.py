@@ -44,7 +44,6 @@ class CustomDatasetFromFetchCifarTest(Dataset):
             stdin, stdout, stderr = ssh.exec_command(command)
             lines = stdout.readlines()
             # print(lines)
-            # print("end")
             for line in lines:
                 self.file_remote_paths.append(line)
                 file_count += 1

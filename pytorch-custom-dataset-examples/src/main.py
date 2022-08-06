@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # PyTorch datasets
     train_ds = ImageFolder(data_dir + '/TRAIN', train_tfms)
-    valid_ds = ImageFolder(data_dir + '/TEST', valid_tfms)
+    # valid_ds = ImageFolder(data_dir + '/TEST', valid_tfms)
 
     # Let's define batch size
     batch_size = 128
@@ -65,13 +65,13 @@ if __name__ == "__main__":
 
     # reusing metadata by calling init for http
     custom_cifar_from_server_train = CustomDatasetFromFetchCifar('archive/CIFAR100/TRAIN')
-    custom_http_server = CustomDatasetFromHTTP('archive/CIFAR100/TRAIN')
+    custom_http_server = CustomDatasetFromHTTP('archive/CIFAR100/TRAIN', custom_random_sampler.shuffler_order_tracker)
     # custom_cifar_from_server_test = CustomDatasetFromFetchCifarTest('archive/CIFAR100TEST')
 
 
     # PyTorch data loaders
     # local file system trained with train_ds
-    # train_dl = torch.utils.data.DataLoader(train_ds, batch_size, shuffle=True, num_workers=3, pin_memory=True)
+    # train_dl = torch.utils.data.DataLoader(train_ds, batch_size=60, shuffle=True, num_workers=3, pin_memory=True)
     # valid_dl = torch.utils.data.DataLoader(valid_ds, batch_size * 2, num_workers=3, pin_memory=True)
     # http server trained with httpserver
     train_dl = torch.utils.data.DataLoader(dataset=custom_http_server, batch_size=60, sampler=custom_random_sampler)
