@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # train_dl = torch.utils.data.DataLoader(train_ds, batch_size=60, shuffle=True, num_workers=3, pin_memory=True)
     # valid_dl = torch.utils.data.DataLoader(valid_ds, batch_size * 2, num_workers=3, pin_memory=True)
     # http server trained with httpserver
-    train_dl = torch.utils.data.DataLoader(dataset=custom_http_server, batch_size=60, sampler=custom_random_sampler)
+    train_dl = torch.utils.data.DataLoader(dataset=custom_http_server, batch_size=60, sampler=custom_random_sampler, pin_memory=True)
     # valid_dl = torch.utils.data.DataLoader(dataset=custom_cifar_from_server_test, batch_size=20,
     #                                        pin_memory=True)
 
@@ -128,9 +128,10 @@ if __name__ == "__main__":
             lrs = []
             training_start_time = time.time()
             counter_for_batch = 0
-            print(train_loader.__len__())
+            print("total batch count: ", format(train_loader.__len__()))
             batch_getting_time = time.time()
             for batch in train_loader:
+                total_batch_time = time.time()
                 print('batch loading took {:.2f}s', format(time.time() - batch_getting_time))
                 print("batch_counter=")
                 print(counter_for_batch)
@@ -150,6 +151,7 @@ if __name__ == "__main__":
                 lrs.append(get_lr(optimizer))
                 sched.step()
                 print('one iteration took {:.2f}s', format(time.time() - training_start_time))
+                print('one batch took {:.2f}s', format(time.time() - total_batch_time))
             print('Training finished, took {:.2f}s',format(time.time() - training_start_time))
 
             # Validation phase
